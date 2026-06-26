@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Event Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="#about" class="nav-link">About</a>
+    <a href="wp_project.html" class="nav-logo-link">
+        <img src="images/logo.png" class="nav-logo" alt="Home">
+    </a>
+    <div style="display:flex; gap:10px;">
+        <a href="#contact" class="nav-link">Contact</a>
+        <a href="login.html" class="nav-link" id="authBtn">Sign In</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <div class="hero-badge">✦ Premium Event Planning</div>
+        <h1 class="hero-title">Your Dream Event,<br><span class="hero-accent">Perfectly Planned</span></h1>
+        <p class="hero-sub">From intimate gatherings to grand celebrations — discover venues, plan smart, celebrate big.</p>
+        <div class="hero-btns">
+            <button class="cta-btn hero-cta-primary" onclick="handlePlanClick()">✨ Plan Your Event</button>
+            <a href="#about" class="cta-btn hero-cta-secondary">Learn More ↓</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item"><span class="stat-num">50+</span><span class="stat-label">Premium Venues</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-num">2</span><span class="stat-label">Cities</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Conflict-Free Booking</span></div>
+        </div>
+    </div>
+
+    <div class="slider-side">
+        <div class="slider">
+            <div class="slider-track">
+                <img src="images/wedding1.png" class="slider-img" onclick="showVenueModal(0)" title="Click to view venue">
+                <img src="images/bday1.png"    class="slider-img" onclick="showVenueModal(1)" title="Click to view venue">
+                <img src="images/decor1.png"   class="slider-img" onclick="showVenueModal(2)" title="Click to view venue">
+                <img src="images/decor2.png"   class="slider-img" onclick="showVenueModal(3)" title="Click to view venue">
+                <img src="images/wedding2.png" class="slider-img" onclick="showVenueModal(4)" title="Click to view venue">
+                <img src="images/bday2.png"    class="slider-img" onclick="showVenueModal(0)" title="Click to view venue">
+                <img src="images/wedding1.png" class="slider-img" onclick="showVenueModal(0)" title="Click to view venue">
+                <img src="images/bday1.png"    class="slider-img" onclick="showVenueModal(1)" title="Click to view venue">
+                <img src="images/decor1.png"   class="slider-img" onclick="showVenueModal(2)" title="Click to view venue">
+                <img src="images/decor2.png"   class="slider-img" onclick="showVenueModal(3)" title="Click to view venue">
+                <img src="images/wedding2.png" class="slider-img" onclick="showVenueModal(4)" title="Click to view venue">
+                <img src="images/bday2.png"    class="slider-img" onclick="showVenueModal(0)" title="Click to view venue">
+            </div>
+        </div>
+        <p class="slider-hint">👆 Click any image to explore the venue</p>
+    </div>
+</section>
+
+<!-- ABOUT / FEATURES -->
+<section class="about" id="about">
+    <div class="about-header">
+        <div class="section-tag">Why Choose Us</div>
+        <h2>Everything You Need to<br>Plan the Perfect Event</h2>
+        <p class="about-sub">Smart Event Planner combines intelligent matching, real-time availability, and seamless booking into one elegant experience.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3>Secure Booking</h3>
+            <p>Your account and bookings are protected with role-based authentication and secure session management.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Smart Scheduling</h3>
+            <p>Our conflict detection system ensures no double bookings. Pick a date and we'll show only what's available.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🏛️</div>
+            <h3>Top Venues</h3>
+            <p>Handpicked venues across Chennai and Bangalore, filtered by your guest count, budget, and theme.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3>Smart Pricing</h3>
+            <p>Dynamic pricing based on event type, theme, guest count, and weekend surcharges — fully transparent.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎟️</div>
+            <h3>Instant Confirmation</h3>
+            <p>Get a unique Booking ID instantly after booking. Print or save your confirmation in seconds.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">↩️</div>
+            <h3>Free Cancellations</h3>
+            <p>Changed your mind? Cancel up to 3 times for free, directly from your dashboard — no hassle.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="contact">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="images/logo.png" class="footer-logo" alt="Logo">
+            <span>Smart Event Planner</span>
+        </div>
+        <div class="footer-links">
+            <h4>Quick Links</h4>
+            <a href="#about">About</a>
+            <a href="login.html">Sign In</a>
+            <a href="login.html">Register</a>
+        </div>
+        <div class="footer-contact">
+            <h4>Contact Us</h4>
+            <p>📧 smarteventplanner@gmail.com</p>
+            <p>📞 +91 98765 43210</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2025 Smart Event Planner. All rights reserved.</div>
+</footer>
+
+<!-- VENUE MODAL -->
+<div id="venueModal" class="venue-modal-overlay" onclick="closeModal(event)">
+    <div class="venue-modal-box">
+        <button class="modal-close-btn" onclick="closeVenueModal()">✕</button>
+        <img id="modalImg" src="" class="modal-img" alt="Venue">
+        <div class="modal-body">
+            <h2 id="modalName"></h2>
+            <p id="modalLocation" class="modal-location">📍 <span></span></p>
+            <div class="modal-details">
+                <div class="modal-detail-item">
+                    <span class="detail-icon">👥</span>
+                    <div>
+                        <div class="detail-label">Capacity</div>
+                        <div class="detail-value" id="modalCapacity"></div>
+                    </div>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="detail-icon">💰</span>
+                    <div>
+                        <div class="detail-label">Starting From</div>
+                        <div class="detail-value" id="modalPrice"></div>
+                    </div>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="detail-icon">🏙️</span>
+                    <div>
+                        <div class="detail-label">City</div>
+                        <div class="detail-value" id="modalCity"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="modal-book-btn" onclick="handlePlanClick()">✨ Book This Venue</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const sliderVenues = [
+    { name: "Royal Palace Hall",       location: "Marina Beach Road, Chennai", city: "Chennai",   capacity: 250, basePrice: 200000, image: "images/wedding1.png" },
+    { name: "Green Garden Venue",      location: "ECR Beach Road, Chennai",    city: "Chennai",   capacity: 150, basePrice: 120000, image: "images/bday1.png"    },
+    { name: "Skyline Convention Center", location: "OMR Road, Chennai",        city: "Chennai",   capacity: 500, basePrice: 350000, image: "images/decor1.png"   },
+    { name: "Grand City Banquet",      location: "MG Road, Bangalore",         city: "Bangalore", capacity: 300, basePrice: 250000, image: "images/decor2.png"   },
+    { name: "Elite Convention Arena",  location: "Whitefield, Bangalore",      city: "Bangalore", capacity: 700, basePrice: 500000, image: "images/wedding2.png" }
+];
+
+function showVenueModal(index) {
+    const v = sliderVenues[index];
+    document.getElementById("modalImg").src = v.image;
+    document.getElementById("modalName").textContent = v.name;
+    document.getElementById("modalLocation").querySelector("span").textContent = v.location;
+    document.getElementById("modalCapacity").textContent = v.capacity + " guests";
+    document.getElementById("modalPrice").textContent = "₹" + v.basePrice.toLocaleString();
+    document.getElementById("modalCity").textContent = v.city;
+    document.getElementById("venueModal").classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+function closeVenueModal() {
+    document.getElementById("venueModal").classList.remove("active");
+    document.body.style.overflow = "";
+}
+
+function closeModal(event) {
+    if (event.target === document.getElementById("venueModal")) closeVenueModal();
+}
+
+function handlePlanClick() {
+    window.location.href = localStorage.getItem("currentUser") ? "planner.html" : "login.html";
+}
+
+window.onload = function() {
+    const user = localStorage.getItem("currentUser");
+    if (user) {
+        const btn = document.getElementById("authBtn");
+        btn.innerText = "Logout";
+        btn.href = "wp_project.html";
+        btn.onclick = function() {
+            localStorage.removeItem("currentUser");
+            localStorage.removeItem("role");
+        };
+    }
+};
+</script>
+
+</body>
+</html>

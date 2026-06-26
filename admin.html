@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+</head>
+<body class="planner-bg">
+
+<nav class="navbar">
+    <a href="wp_project.html" class="nav-link">Home</a>
+    <a href="wp_project.html" class="nav-logo-link">
+        <img src="images/logo.png" class="nav-logo" alt="Home">
+    </a>
+    <a href="#" class="nav-link" onclick="logout()">Logout</a>
+</nav>
+
+<div class="container colorful" style="max-width:750px;">
+    <h1>Admin Dashboard</h1>
+
+    <h3>All Bookings</h3>
+
+    <!-- SEARCH & FILTER BAR -->
+    <div class="admin-filter-bar">
+        <div class="field-wrapper" style="flex:1; margin:0;">
+            <input type="text" id="searchUser" placeholder="🔍 Search by user or venue..." oninput="applyFilters()">
+        </div>
+        <div class="field-wrapper" style="margin:0;">
+            <input type="date" id="filterDate" onchange="applyFilters()">
+        </div>
+        <button class="cta-btn planner-btn" style="width:auto; padding:10px 18px; margin:0;" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div id="bookingCount" class="admin-count"></div>
+    <div id="bookingList"></div>
+
+    <h3 style="margin-top:32px;">Cancellation Logs</h3>
+    <div id="cancellationList"></div>
+</div>
+
+<script>
+
+if (localStorage.getItem("role") !== "admin") {
+    window.location.href = "login.html";
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("role");
+    window.location.href = "login.html";
+}
+
+let allBookings = [];
+
+function loadBookings() {
+    allBookings = JSON.parse(localStorage.getItem("bookings")) || [];
+    applyFilters();
+}
+
+function applyFilters() {
+    const search = document.getElementById("searchUser").value.trim().toLowerCase();
+    const date = document.getElementById("filterDate").value;
+    const container = document.getElementById("bookingList");
+    const countEl = document.getElementById("bookingCount");
+
+    let filtered = allBookings;
+
+    if (search) {
+        filtered = filtered.filter(b =>
+            b.user.toLowerCase().includes(search) ||
+            b.venueName.toLowerCase().includes(search)
+        );
+    }
+
+    if (date) {
+        filtered = filtered.filter(b => b.date === date);
+    }
+
+    container.innerHTML = "";
+    countEl.textContent = `Showing ${filtered.length} of ${allBookings.length} bookings`;
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>No bookings match your search.</p>";
+        return;
+    }
+
+    filtered.forEach(b => {
+        container.innerHTML += `
+            <div class="venue-card">
+                <div class="venue-info">
+                    <h3>${b.venueName}</h3>
+                    <p><strong>Booking ID:</strong> ${b.bookingId || "N/A"}</p>
+                    <p><strong>User:</strong> ${b.user}</p>
+                    <p><strong>Date:</strong> ${b.date}</p>
+                    <p><strong>Amount:</strong> ₹${(b.price || 0).toLocaleString()}</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function clearFilters() {
+    document.getElementById("searchUser").value = "";
+    document.getElementById("filterDate").value = "";
+    applyFilters();
+}
+
+function loadCancellations() {
+    const logs = JSON.parse(localStorage.getItem("cancellationLogs")) || [];
+    const container = document.getElementById("cancellationList");
+    container.innerHTML = "";
+
+    if (logs.length === 0) {
+        container.innerHTML = "<p>No cancellations yet.</p>";
+        return;
+    }
+
+    logs.forEach(log => {
+        container.innerHTML += `
+            <div class="venue-card">
+                <div class="venue-info">
+                    <h3>${log.venueName}</h3>
+                    <p><strong>User:</strong> ${log.user}</p>
+                    <p><strong>Event Date:</strong> ${log.eventDate}</p>
+                    <p><strong>Cancelled At:</strong> ${log.cancelledAt}</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+loadBookings();
+loadCancellations();
+
+</script>
+
+</body>
+</html>

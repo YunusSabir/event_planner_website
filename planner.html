@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+</head>
+<body class="planner-bg">
+
+<nav class="navbar">
+    <a href="wp_project.html" class="nav-link">Home</a>
+    <a href="wp_project.html" class="nav-logo-link">
+        <img src="images/logo.png" class="nav-logo" alt="Home">
+    </a>
+    <span class="nav-link inactive">Planner</span>
+</nav>
+
+<div class="container colorful" id="formSection">
+    <h1>Event Planner</h1>
+
+    <div class="field-wrapper">
+        <select id="eventType" onchange="clearError('eventType')">
+            <option value="">Event Type</option>
+            <option>Birthday</option>
+            <option>Marriage</option>
+            <option>Corporate</option>
+            <option>College Event</option>
+        </select>
+        <div class="error-msg" id="err-eventType"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <select id="budget" onchange="clearError('budget')">
+            <option value="">Budget</option>
+            <option>1-3 Lakhs</option>
+            <option>3-5 Lakhs</option>
+            <option>5+ Lakhs</option>
+        </select>
+        <div class="error-msg" id="err-budget"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <select id="location" onchange="clearError('location')">
+            <option value="">Location</option>
+            <option>Chennai</option>
+            <option>Bangalore</option>
+        </select>
+        <div class="error-msg" id="err-location"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <select id="theme" onchange="clearError('theme')">
+            <option value="">Theme</option>
+            <option value="royal">Royal</option>
+            <option value="modern">Modern</option>
+            <option value="minimal">Minimal</option>
+        </select>
+        <div class="error-msg" id="err-theme"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <select id="guestRange" onchange="clearError('guestRange')">
+            <option value="">Guest Count</option>
+            <option value="small">Small — Up to 100 guests</option>
+            <option value="medium">Medium — 100 to 300 guests</option>
+            <option value="large">Large — 300 to 600 guests</option>
+            <option value="grand">Grand — 600+ guests</option>
+        </select>
+        <div class="error-msg" id="err-guestRange"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="date" id="eventDate" oninput="clearError('eventDate')">
+        <div class="error-msg" id="err-eventDate"></div>
+    </div>
+
+    <script>
+        // Set minimum date to today
+        document.getElementById("eventDate").min = new Date().toISOString().split("T")[0];
+    </script>
+
+    <h3>Booking Details</h3>
+
+    <div class="field-wrapper">
+        <input type="text" id="username" placeholder="Your Name" oninput="clearError('username')">
+        <div class="error-msg" id="err-username"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="email" id="email" placeholder="Email" oninput="clearError('email')">
+        <div class="error-msg" id="err-email"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="tel" id="phone" placeholder="Phone Number" oninput="clearError('phone')">
+        <div class="error-msg" id="err-phone"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="text" id="chiefGuest" placeholder="Chief Guest (Optional)">
+    </div>
+
+    <div class="btn-center">
+        <button class="cta-btn planner-btn" onclick="getRecommendations()">
+            Get Recommendations
+        </button>
+    </div>
+</div>
+
+<div class="container colorful hidden" id="results">
+    <h2>Recommended Venues</h2>
+    <div id="venueCount" class="admin-count"></div>
+
+    <!-- Spinner -->
+    <div id="spinner" class="spinner-wrap hidden">
+        <div class="spinner"></div>
+        <p>Finding the best venues for you...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🏛️</div>
+        <h3>No Venues Found</h3>
+        <p>No venues match your filters. Try a different location or increase your guest count.</p>
+        <button class="cta-btn planner-btn" onclick="goBack()">← Adjust Filters</button>
+    </div>
+
+    <div id="venueList"></div>
+
+    <div class="btn-center" id="backBtnWrap">
+        <button class="cta-btn planner-btn" onclick="goBack()">Back</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+
+if (!localStorage.getItem("currentUser")) {
+    window.location.href = "login.html";
+}
+
+if (localStorage.getItem("returnToResults") === "true") {
+    document.getElementById("formSection").classList.add("hidden");
+    document.getElementById("results").classList.remove("hidden");
+    localStorage.removeItem("returnToResults");
+    getRecommendations();
+}
+
+// ============ VALIDATION HELPERS ============
+
+function showError(fieldId, message) {
+    const input = document.getElementById(fieldId);
+    const err = document.getElementById("err-" + fieldId);
+    if (input) {
+        input.classList.add("invalid");
+        input.classList.remove("valid");
+    }
+    if (err) {
+        err.textContent = message;
+        err.classList.add("visible");
+    }
+}
+
+function showValid(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (input) {
+        input.classList.add("valid");
+        input.classList.remove("invalid");
+    }
+}
+
+function clearError(fieldId) {
+    const input = document.getElementById(fieldId);
+    const err = document.getElementById("err-" + fieldId);
+    if (input) input.classList.remove("invalid", "valid");
+    if (err) {
+        err.textContent = "";
+        err.classList.remove("visible");
+    }
+}
+
+function clearAllPlannerErrors() {
+    ["eventType","budget","location","theme",
+     "guestRange","eventDate","username","email","phone"].forEach(clearError);
+}
+
+// ============ FIELD VALIDATORS ============
+
+function validateSelect(fieldId, label) {
+    const val = document.getElementById(fieldId).value;
+    if (!val) {
+        showError(fieldId, `Please select a ${label}.`);
+        return false;
+    }
+    showValid(fieldId);
+    return true;
+}
+
+function validateGuestRange() {
+    const val = document.getElementById("guestRange").value;
+    if (!val) {
+        showError("guestRange", "Please select a guest range.");
+        return false;
+    }
+    showValid("guestRange");
+    return true;
+}
+
+function validateEventDate() {
+    const val = document.getElementById("eventDate").value;
+    if (!val) {
+        showError("eventDate", "Please select an event date.");
+        return false;
+    }
+    const selected = new Date(val);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selected < today) {
+        showError("eventDate", "Event date cannot be in the past.");
+        return false;
+    }
+    showValid("eventDate");
+    return true;
+}
+
+function validateName() {
+    const val = document.getElementById("username").value.trim();
+    if (!val) {
+        showError("username", "Your name is required.");
+        return false;
+    }
+    if (val.length < 2) {
+        showError("username", "Name must be at least 2 characters.");
+        return false;
+    }
+    if (!/^[a-zA-Z\s]+$/.test(val)) {
+        showError("username", "Name should only contain letters and spaces.");
+        return false;
+    }
+    showValid("username");
+    return true;
+}
+
+function validateEmail() {
+    const val = document.getElementById("email").value.trim();
+    if (!val) {
+        showError("email", "Email address is required.");
+        return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        showError("email", "Please enter a valid email address.");
+        return false;
+    }
+    showValid("email");
+    return true;
+}
+
+function validatePhone() {
+    const val = document.getElementById("phone").value.trim();
+    if (!val) {
+        showError("phone", "Phone number is required.");
+        return false;
+    }
+    if (!/^[6-9]\d{9}$/.test(val)) {
+        showError("phone", "Enter a valid 10-digit Indian mobile number.");
+        return false;
+    }
+    showValid("phone");
+    return true;
+}
+
+// ============ OVERRIDE getRecommendations to validate first ============
+
+const _originalGetRecommendations = getRecommendations;
+
+getRecommendations = function() {
+    clearAllPlannerErrors();
+
+    const e1 = validateSelect("eventType", "event type");
+    const e2 = validateSelect("budget", "budget range");
+    const e3 = validateSelect("location", "location");
+    const e4 = validateSelect("theme", "theme");
+    const e5 = validateGuestRange();
+    const e6 = validateEventDate();
+    const e7 = validateName();
+    const e8 = validateEmail();
+    const e9 = validatePhone();
+
+    if (!e1 || !e2 || !e3 || !e4 || !e5 || !e6 || !e7 || !e8 || !e9) {
+        const firstInvalid = document.querySelector(".invalid");
+        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+    }
+
+    // Show spinner
+    document.getElementById("formSection").classList.add("hidden");
+    document.getElementById("results").classList.remove("hidden");
+    document.getElementById("spinner").classList.remove("hidden");
+    document.getElementById("emptyState").classList.add("hidden");
+    document.getElementById("venueList").innerHTML = "";
+    document.getElementById("backBtnWrap").classList.add("hidden");
+
+    setTimeout(() => {
+        document.getElementById("spinner").classList.add("hidden");
+        _originalGetRecommendations();
+    }, 800);
+};
+
+</script>
+
+</body>
+</html>

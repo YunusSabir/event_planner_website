@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Confirmation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+</head>
+<body class="planner-bg">
+
+<div class="container colorful" id="confirmationBox">
+
+    <div class="confirm-header">
+        <div class="confirm-checkmark">✓</div>
+        <h1>Booking Confirmed!</h1>
+        <p class="confirm-sub">Your event has been successfully booked. Save your Booking ID for reference.</p>
+    </div>
+
+    <div id="confirmationDetails"></div>
+
+    <div class="btn-center" style="gap:12px; display:flex; flex-wrap:wrap; justify-content:center;">
+        <button class="cta-btn planner-btn" onclick="window.print()">🖨️ Print</button>
+        <button class="cta-btn planner-btn" onclick="goDashboard()">📋 Dashboard</button>
+        <button class="cta-btn" onclick="goBackToPlanner()">← Back to Venues</button>
+    </div>
+
+</div>
+
+<script>
+const booking = JSON.parse(localStorage.getItem("latestBooking"));
+
+if (!booking) {
+    document.getElementById("confirmationDetails").innerHTML = "<p>No booking found.</p>";
+} else {
+    document.getElementById("confirmationDetails").innerHTML = `
+        <div class="confirm-detail-grid">
+            <div class="confirm-row">
+                <span class="confirm-label">Booking ID</span>
+                <span class="confirm-value booking-id-row">
+                    <span id="bookingIdText">${booking.bookingId}</span>
+                    <button class="copy-btn" onclick="copyBookingId()" title="Copy Booking ID">📋 Copy</button>
+                </span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">User</span>
+                <span class="confirm-value">${booking.user}</span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Venue</span>
+                <span class="confirm-value">${booking.venueName}</span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Location</span>
+                <span class="confirm-value">${booking.venueLocation || "—"}</span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Event Date</span>
+                <span class="confirm-value">${booking.date}</span>
+            </div>
+            <div class="confirm-row highlight-row">
+                <span class="confirm-label">Total Amount</span>
+                <span class="confirm-value confirm-price">₹${booking.price.toLocaleString()}</span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Booked At</span>
+                <span class="confirm-value">${booking.timestamp}</span>
+            </div>
+        </div>
+        <div id="copyMsg" class="copy-success" style="display:none;">✅ Booking ID copied!</div>
+    `;
+}
+
+function copyBookingId() {
+    const id = document.getElementById("bookingIdText").textContent;
+    navigator.clipboard.writeText(id).then(() => {
+        const msg = document.getElementById("copyMsg");
+        msg.style.display = "block";
+        setTimeout(() => msg.style.display = "none", 2500);
+    });
+}
+
+function goDashboard() { window.location.href = "dashboard.html"; }
+function goBackToPlanner() { window.location.href = "planner.html"; }
+</script>
+
+</body>
+</html>

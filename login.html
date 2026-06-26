@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Smart Event Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+</head>
+<body class="planner-bg">
+
+<div class="container colorful">
+    <h1>Login / Register</h1>
+
+    <div class="field-wrapper">
+        <input type="text" id="username" placeholder="Username" oninput="clearError('username')">
+        <div class="error-msg" id="err-username"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="password" id="password" placeholder="Password" oninput="clearError('password')">
+        <div class="error-msg" id="err-password"></div>
+    </div>
+
+    <div class="field-wrapper">
+        <input type="tel" id="phone" placeholder="Phone Number (For Register)" oninput="clearError('phone')">
+        <div class="error-msg" id="err-phone"></div>
+    </div>
+
+    <button class="cta-btn planner-btn" onclick="login()">Login</button>
+    <button class="cta-btn planner-btn" onclick="register()">Register</button>
+    <button class="cta-btn" onclick="goHome()">← Back to Home</button>
+</div>
+
+<script>
+const API = "http://localhost:5000";
+
+// ============ VALIDATION HELPERS ============
+
+function showError(fieldId, message) {
+    const input = document.getElementById(fieldId);
+    const err = document.getElementById("err-" + fieldId);
+    if (input) {
+        input.classList.add("invalid");
+        input.classList.remove("valid");
+    }
+    if (err) {
+        err.textContent = message;
+        err.classList.add("visible");
+    }
+}
+
+function showValid(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (input) {
+        input.classList.add("valid");
+        input.classList.remove("invalid");
+    }
+}
+
+function clearError(fieldId) {
+    const input = document.getElementById(fieldId);
+    const err = document.getElementById("err-" + fieldId);
+    if (input) {
+        input.classList.remove("invalid", "valid");
+    }
+    if (err) {
+        err.textContent = "";
+        err.classList.remove("visible");
+    }
+}
+
+function clearAllErrors() {
+    ["username", "password", "phone"].forEach(clearError);
+}
+
+// ============ FIELD VALIDATORS ============
+
+function validateUsername(required = true) {
+    const val = document.getElementById("username").value.trim();
+    if (!val) {
+        if (required) showError("username", "Username is required.");
+        return false;
+    }
+    if (val.length < 3) {
+        showError("username", "Username must be at least 3 characters.");
+        return false;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+        showError("username", "Only letters, numbers, and underscores allowed.");
+        return false;
+    }
+    showValid("username");
+    return true;
+}
+
+function validatePassword(required = true) {
+    const val = document.getElementById("password").value.trim();
+    if (!val) {
+        if (required) showError("password", "Password is required.");
+        return false;
+    }
+    if (val.length < 6) {
+        showError("password", "Password must be at least 6 characters.");
+        return false;
+    }
+    showValid("password");
+    return true;
+}
+
+function validatePhone(required = false) {
+    const val = document.getElementById("phone").value.trim();
+    if (!val) {
+        if (required) {
+            showError("phone", "Phone number is required for registration.");
+            return false;
+        }
+        return true; // optional for login
+    }
+    if (!/^[6-9]\d{9}$/.test(val)) {
+        showError("phone", "Enter a valid 10-digit Indian mobile number.");
+        return false;
+    }
+    showValid("phone");
+    return true;
+}
+
+// ============ LOGIN ============
+
+async function login() {
+    clearAllErrors();
+    const u = validateUsername();
+    const p = validatePassword();
+    if (!u || !p) return;
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            showError("username", data.error || "Invalid credentials");
+            showError("password", data.error || "Invalid credentials");
+            return;
+        }
+
+        localStorage.setItem("currentUser", data.username);
+        localStorage.setItem("role", data.role);
+        window.location.href = data.role === "admin" ? "admin.html" : "dashboard.html";
+
+    } catch (err) {
+        // Fallback to localStorage if server is down
+        console.warn("Backend offline, using localStorage fallback");
+
+        const ADMIN_USERNAME = "admin";
+        const ADMIN_PASSWORD = "admin123";
+
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+            localStorage.setItem("currentUser", "admin");
+            localStorage.setItem("role", "admin");
+            window.location.href = "admin.html";
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const validUser = users.find(u => u.username === username && u.password === password);
+        if (!validUser) {
+            showError("username", "Invalid username or password.");
+            showError("password", "Invalid username or password.");
+            return;
+        }
+        localStorage.setItem("currentUser", username);
+        localStorage.setItem("role", "user");
+        window.location.href = "dashboard.html";
+    }
+}
+
+// ============ REGISTER ============
+
+async function register() {
+    clearAllErrors();
+    const u = validateUsername();
+    const p = validatePassword();
+    const ph = validatePhone(true);
+    if (!u || !p || !ph) return;
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const phone    = document.getElementById("phone").value.trim();
+
+    try {
+        const res = await fetch(`${API}/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password, phone })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            if (res.status === 409) showError("username", "This username is already taken.");
+            else showError("username", data.error || "Registration failed.");
+            return;
+        }
+
+        // Success feedback — redirect to login instead of alert
+        document.querySelector(".container").innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <div style="font-size:3rem; margin-bottom:16px;">✅</div>
+                <h2 style="color:#2ecc71;">Registration Successful!</h2>
+                <p style="color:#555;">Your account has been created. Please login to continue.</p>
+                <button class="cta-btn planner-btn" style="margin-top:20px;" onclick="window.location.href='login.html'">
+                    Go to Login →
+                </button>
+            </div>
+        `;
+
+    } catch (err) {
+        // Fallback
+        console.warn("Backend offline, using localStorage fallback");
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        if (users.find(u => u.username === username)) {
+            showError("username", "This username is already taken.");
+            return;
+        }
+        users.push({ username, password, phone });
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Registration successful! Please login.");
+    }
+}
+
+function goHome() {
+    window.location.href = "wp_project.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo.png">
+</head>
+<body class="planner-bg">
+
+<nav class="navbar">
+    <a href="wp_project.html" class="nav-link">Home</a>
+
+    <a href="wp_project.html" class="nav-logo-link">
+        <img src="images/logo.png" class="nav-logo" alt="Home">
+    </a>
+
+    <div style="display:flex; gap:10px;">
+        <a href="planner.html" class="nav-link">Book New Event</a>
+        <a href="#" class="nav-link" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container colorful">
+    <h1>My Dashboard</h1>
+
+    <h3>Statistics</h3>
+    <div id="stats"></div>
+
+    <h3>Upcoming Events</h3>
+    <div id="upcoming"></div>
+
+    <h3>Past Events</h3>
+    <div id="past"></div>
+</div>
+
+<script>
+
+if (localStorage.getItem("role") !== "user") {
+    window.location.href = "login.html";
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("role");
+    window.location.href = "login.html";
+}
+
+function loadDashboard() {
+
+    const currentUser = localStorage.getItem("currentUser");
+    const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+    const cancellations = JSON.parse(localStorage.getItem("cancellations")) || {};
+
+    const userBookings = bookings.filter(b => b.user === currentUser);
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const upcoming = userBookings.filter(b => b.date >= today);
+    const past = userBookings.filter(b => b.date < today);
+
+    let totalSpent = 0;
+    userBookings.forEach(b => { totalSpent += b.price || 0; });
+
+    const cancelCount = cancellations[currentUser] || 0;
+
+    document.getElementById("stats").innerHTML = `
+        <p><strong>Total Bookings:</strong> ${userBookings.length}</p>
+        <p><strong>Upcoming Events:</strong> ${upcoming.length}</p>
+        <p><strong>Past Events:</strong> ${past.length}</p>
+        <p><strong>Cancellations Used:</strong> ${cancelCount}/3</p>
+        <p><strong>Total Money Spent:</strong> ₹${totalSpent.toLocaleString()}</p>
+    `;
+
+    displayBookings(upcoming, "upcoming", true);
+    displayBookings(past, "past", false);
+}
+
+function displayBookings(list, elementId, allowCancel) {
+
+    const container = document.getElementById(elementId);
+    container.innerHTML = "";
+
+    if (list.length === 0) {
+        container.innerHTML = "<p>No records found.</p>";
+        return;
+    }
+
+    const currentUser = localStorage.getItem("currentUser");
+    const cancellations = JSON.parse(localStorage.getItem("cancellations")) || {};
+    const cancelCount = cancellations[currentUser] || 0;
+
+    list.forEach(b => {
+        let cancelBtn = "";
+        if (allowCancel) {
+            const disabled = cancelCount >= 3 ? "disabled" : "";
+            cancelBtn = `
+                <button class="cancel-dash-btn" ${disabled}
+                    onclick="cancelFromDashboard('${b.venueId}', '${b.date}')">
+                    Cancel Booking
+                </button>
+                <div class="booked-label">Free cancellations: ${cancelCount}/3</div>
+            `;
+        }
+
+        container.innerHTML += `
+            <div class="venue-card">
+                <div class="venue-info">
+                    <h3>${b.venueName}</h3>
+                    <p><strong>Booking ID:</strong> ${b.bookingId || "N/A"}</p>
+                    <p><strong>Date:</strong> ${b.date}</p>
+                    <p><strong>Amount:</strong> ₹${(b.price || 0).toLocaleString()}</p>
+                    ${cancelBtn}
+                </div>
+            </div>
+        `;
+    });
+}
+
+function cancelFromDashboard(venueId, date) {
+    const currentUser = localStorage.getItem("currentUser");
+
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+    let cancellations = JSON.parse(localStorage.getItem("cancellations")) || {};
+    let logs = JSON.parse(localStorage.getItem("cancellationLogs")) || [];
+
+    const userCancelCount = cancellations[currentUser] || 0;
+
+    if (userCancelCount >= 3) {
+        alert("Free cancellation limit reached.");
+        return;
+    }
+
+    const booking = bookings.find(b =>
+        String(b.venueId) === String(venueId) && b.date === date && b.user === currentUser
+    );
+
+    if (!booking) {
+        alert("Booking not found.");
+        return;
+    }
+
+    if (!confirm(`Cancel booking for ${booking.venueName} on ${booking.date}?`)) return;
+
+    bookings = bookings.filter(b =>
+        !(String(b.venueId) === String(venueId) && b.date === date && b.user === currentUser)
+    );
+
+    cancellations[currentUser] = userCancelCount + 1;
+
+    logs.push({
+        user: currentUser,
+        venueName: booking.venueName,
+        eventDate: booking.date,
+        cancelledAt: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("bookings", JSON.stringify(bookings));
+    localStorage.setItem("cancellations", JSON.stringify(cancellations));
+    localStorage.setItem("cancellationLogs", JSON.stringify(logs));
+
+    alert("Booking cancelled successfully!");
+    loadDashboard();
+}
+
+loadDashboard();
+
+</script>
+
+</body>
+</html>
